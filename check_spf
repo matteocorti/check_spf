@@ -1,0 +1,211 @@
+#!perl
+
+# nagios: -epn
+
+package main;
+
+# check_spf is a Nagios plugin to check SPF records
+#
+# See  the INSTALL file for installation instructions
+#
+# Copyright (c) 2007-2020 Matteo Corti <matteo@corti.li>
+#
+# This module is free software; you can redistribute it and/or modify it
+# under the terms of GNU general public license (gpl) version 3,
+# or (at your option) any later version.
+# See the COPYING file for details.
+
+use 5.00800;
+
+use strict;
+use warnings;
+
+our $VERSION = '1.0.0';
+
+use Carp;
+use English qw(-no_match_vars);
+use Readonly;
+use Monitoring::Plugin;
+use Monitoring::Plugin::Threshold;
+use Monitoring::Plugin::Getopt;
+
+Readonly our $EXIT_UNKNOWN                 => 3;
+
+# IMPORTANT: Nagios plugins could be executed using embedded perl in this case
+#            the main routine would be executed as a subroutine and all the
+#            declared subroutines would therefore be inner subroutines
+#            This will cause all the global lexical variables not to stay shared
+#            in the subroutines!
+#
+# All variables are therefore declared as package variables...
+#
+## no critic (ProhibitPackageVars)
+use vars qw(
+  $bootcheck
+  $exit_message
+  $help
+  $options
+  $plugin
+  $security_plugin
+  $status
+  $threshold
+  $wrong_kernel
+  $yum_executable
+  @status_lines
+);
+## use critic
+
+##############################################################################
+# Usage     : verbose("some message string", $optional_verbosity_level);
+# Purpose   : write a message if the verbosity level is high enough
+# Returns   : n/a
+# Arguments : message : message string
+#             level   : options verbosity level
+# Throws    : n/a
+# Comments  : n/a
+# See also  : n/a
+sub verbose {
+
+    # arguments
+    my $message = shift;
+    my $level   = shift;
+
+    if ( !defined $message ) {
+        exit_with_error( Monitoring::Plugin->UNKNOWN,
+            q{Internal error: not enough parameters for 'verbose'} );
+    }
+
+    if ( !defined $level ) {
+        $level = 0;
+    }
+
+    # we check if options is defined as the it could be undefined if
+    # running from a unit test
+    if ( defined $options && $level < $options->verbose ) {
+        #<<<
+        print $message; ## no critic (RequireCheckedSyscalls)
+        #>>>
+    }
+
+    return;
+
+}
+
+##############################################################################
+# Usage     : debug("some message string");
+# Purpose   : write a debugging message
+# Returns   : n/a
+# Arguments : message : message string
+# Throws    : n/a
+# Comments  : n/a
+# See also  : n/a
+sub debug {
+
+    # arguments
+    my $message = shift;
+
+    if ( !defined $message ) {
+        exit_with_error( Monitoring::Plugin->UNKNOWN,
+            q{Internal error: not enough parameters for 'debug'} );
+    }
+
+    if ( defined $options && $options->get('debug') ) {
+        print "[DBG] $message";    ## no critic (RequireCheckedSyscalls)
+    }
+
+    return;
+
+}
+
+##############################################################################
+# Usage     : exit_with_error( $status, $message)
+# Purpose   : if a plugin object is available exits via ->nagios_exit
+#             otherwise prints to the shell and exit normally
+# Returns   : n/a
+# Arguments : n/a
+# Throws    : n/a
+# Comments  : n/a
+# See also  : n/a
+sub exit_with_error {
+
+    my $status  = shift;
+    my $message = shift;
+
+    if ($plugin) {
+        $plugin->nagios_exit( $status, $message );
+    }
+    else {
+        #<<<
+        print "Error: $message"; ## no critic (RequireCheckedSyscalls)
+        #>>>
+        exit $status;
+    }
+
+    return;
+
+}
+
+# the script is declared as a package so that it can be unit tested
+# but it should not be used as a module
+if ( !caller ) {
+
+    run();
+}
+
+##############################################################################
+# Usage     : run();
+# Purpose   : main method
+# Returns   : n/a
+# Arguments : n/a
+# Throws    : n/a
+# Comments  : n/a
+# See also  : n/a
+
+## no critic (ProhibitExcessComplexity)
+sub run {
+
+    $status = Monitoring::Plugin->OK;
+
+    ##############################################################################
+    # main
+    #
+
+    ################
+    # initialization
+    $help         = q{};
+    $bootcheck    = 1;
+    $wrong_kernel = 0;
+    $plugin       = Monitoring::Plugin->new( shortname => 'CHECK_SPF' );
+
+    ########################
+    # Command line arguments
+
+    $options = Monitoring::Plugin::Getopt->new(
+        usage   => 'Usage: %s [OPTIONS]',
+        version => $VERSION,
+        url     => 'https://github.com/matteocorti/check_spf',
+        blurb   => 'Checks SPF records',
+    );
+
+    $options->arg(
+        spec => 'debug|d',
+        help => 'Enables debugging messages',
+    );
+
+    $options->getopts();
+
+    debug "check_spf version: $VERSION\n", 1;
+
+    ###############
+    # Sanity checks
+
+    #########
+    # Timeout
+
+    alarm $options->timeout;
+
+    return;
+
+}
+
+1;
