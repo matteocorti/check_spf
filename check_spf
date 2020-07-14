@@ -194,37 +194,37 @@ sub run {
     $options->arg(
         spec => 'debug|d',
         help => 'Enables debugging messages',
-	);
+    );
 
     $options->arg(
-	spec => 'ip|i=s',
-	help => 'IP to test (IPv4 or IPv6)',
-	required => 1,
-	);
+        spec     => 'ip|i=s',
+        help     => 'IP to test (IPv4 or IPv6)',
+        required => 1,
+    );
 
     $options->arg(
-	spec => 'from|f=s',
-	help => 'Envelope from address',
-	required => 1,
-	);
+        spec     => 'from|f=s',
+        help     => 'Envelope from address',
+        required => 1,
+    );
 
     $options->arg(
-	spec => 'ehlo|helo|e',
-	help => 'EHLO|HELO',
-	required => 1,
-	);
+        spec     => 'ehlo|helo|e',
+        help     => 'EHLO|HELO',
+        required => 1,
+    );
 
     $options->arg(
-	spec => 'myhostname|m',
-	help => 'my hostname',
-	);
-    
+        spec => 'myhostname|m',
+        help => 'my hostname',
+    );
+
     $options->getopts();
 
     if ( $options->get('debug') ) {
-	Mail::SPF::Iterator->import(Debug => 1);
+        Mail::SPF::Iterator->import( Debug => 1 );
     }
-    
+
     debug "check_spf version: $VERSION\n", 1;
 
     ###############
@@ -243,7 +243,7 @@ sub run {
         {
             default_spf => 'mx/24 ?all',    # in case no record was found in DNS
             pass_all    => SPF_SoftFail,    # treat records like '+all' as error
-	    # rfc4408 => 1,              # for compatibility only
+                 # rfc4408 => 1,              # for compatibility only
         }
     );
 
@@ -251,13 +251,13 @@ sub run {
     my $resolver = Net::DNS::Resolver->new;
 
     ### OR with
-    my ($result,@ans) = $spf->lookup_blocking( undef,$resolver );
+    my ( $result, @ans ) = $spf->lookup_blocking( undef, $resolver );
 
     ### print mailheader
     print "Received-SPF: " . $spf->mailheader;
     print "\n";
 
-#    print Dumper $spf;
+    #    print Dumper $spf;
 
     # $result = Fail|Pass|...
     # $ans[0] = comment for Received-SPF
