@@ -1,7 +1,7 @@
 %define version          0.9.0
 %define release          0
 %define sourcename       check_spf
-%define packagename      nagios-plugins-check-updates
+%define packagename      nagios-plugins-check-spf
 %define nagiospluginsdir %{_libdir}/nagios/plugins
 
 # No binaries in this package
@@ -23,6 +23,8 @@ Source:        https://github.com/matteocorti/%{sourcename}/releases/download/v%
 BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: perl(Test::More)
 BuildRequires: perl(Readonly)
+
+Requires: perl(Mail::SPF::Iterator)
 
 Requires:      nagios-plugins
 # Yum security plugin RPM:
