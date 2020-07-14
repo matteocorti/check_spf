@@ -29,6 +29,8 @@ use Monitoring::Plugin;
 use Monitoring::Plugin::Threshold;
 use Monitoring::Plugin::Getopt;
 
+use Data::Dumper;
+
 use Net::DNS;
 use Mail::SPF::Iterator;
 
@@ -192,8 +194,31 @@ sub run {
     $options->arg(
         spec => 'debug|d',
         help => 'Enables debugging messages',
-    );
+	);
 
+    $options->arg(
+	spec => 'ip|i=s',
+	help => 'IP to test (IPv4 or IPv6)',
+	required => 1,
+	);
+
+    $options->arg(
+	spec => 'from|f=s',
+	help => 'Envelope from address',
+	required => 1,
+	);
+
+    $options->arg(
+	spec => 'ehlo|helo|e',
+	help => 'EHLO|HELO',
+	required => 1,
+	);
+
+    $options->arg(
+	spec => 'myhostname|m',
+	help => 'my hostname',
+	);
+    
     $options->getopts();
 
     if ( $options->get('debug') ) {
@@ -210,60 +235,29 @@ sub run {
 
     alarm $options->timeout;
 
-    # to be updated
-    my $ip       = '138.201.94.172';
-    my $mailfrom = 'corti@ethz.ch';
-    my $helo     = 'matteo.ethz.ch';
-    my $myname   = 'matteo.ethz.ch';
-
     my $spf = Mail::SPF::Iterator->new(
-        $ip,          # IP4|IP6 of client
-        $mailfrom,    # from MAIL FROM:
-        $helo,        # from HELO|EHLO
-        $myname,      # optional: my hostname
+        $options->ip,
+        $options->from,
+        $options->ehlo,
+        $options->myhostname,
         {
             default_spf => 'mx/24 ?all',    # in case no record was found in DNS
             pass_all    => SPF_SoftFail,    # treat records like '+all' as error
-                 # rfc4408 => 1,              # for compatibility only
+	    # rfc4408 => 1,              # for compatibility only
         }
     );
 
     # could be other resolvers too
     my $resolver = Net::DNS::Resolver->new;
 
-    ### with nonblocking, but still in loop
-    ### (callbacks are preferred with non-blocking)
-    my ( $result, @ans ) = $spf->next;    # initial query
-    while ( !$result ) {
-        my @query = @ans;
-
-        if ( !@query ) {
-
-            exit_with_error( Monitoring::Plugin->UNKNOWN,
-                q{Internal error: no queries} );
-        }
-
-        for my $q (@query) {
-
-            # resolve query
-            my $socket = $resolver->bgsend($q);
-
-            my $answer = $resolver->bgread($socket);
-            ( $result, @ans ) = $spf->next(
-                $answer                                # valid answer
-                  || [ $q, $resolver->errorstring ]    # or DNS problem
-            );
-            last if $result;                           # got final result
-            last if @ans;                              # got more DNS queries
-        }
-    }
-
-    ### OR with blocking:
-    ### ($result,@ans) = $spf->lookup_blocking( undef,$resolver );
+    ### OR with
+    my ($result,@ans) = $spf->lookup_blocking( undef,$resolver );
 
     ### print mailheader
     print "Received-SPF: " . $spf->mailheader;
-    print "\n\n";
+    print "\n";
+
+#    print Dumper $spf;
 
     # $result = Fail|Pass|...
     # $ans[0] = comment for Received-SPF
