@@ -21,6 +21,8 @@ my %prereqs = (
     'Monitoring::Plugin' => 0,
     'Monitoring::Plugin::Threshold' => 0,
     'Monitoring::Plugin::Getopt' => 0,
+    'Mail::SPF::Iterator' => 0,
+    'Net::DNS' => 0,
 );
 
 install_script  'check_spf';

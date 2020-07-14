@@ -252,10 +252,17 @@ sub run {
 
     ### OR with
     my ( $result, @ans ) = $spf->lookup_blocking( undef, $resolver );
-
+    
+    # Default
+    if ( $result eq 'Pass' || $result eq 'Neutral' ) {
+	$plugin->nagios_exit( Monitoring::Plugin->OK, $result . ': ' . $ans[0] );
+    } elsif ( $result eq 'SoftFail' || $result eq 'Fail' ) {
+	$plugin->nagios_exit( Monitoring::Plugin->CRITICAL, $result . ': ' . $ans[0] );
+    } elsif ( $result eq 'PermError' || $result eq 'TempError' )  {
+	$plugin->nagios_exit( Monitoring::Plugin->UNKNOWN, $result . ': ' . $ans[0] );
+    }
+    
     ### print mailheader
-    print "Received-SPF: " . $spf->mailheader;
-    print "\n";
 
     #    print Dumper $spf;
 
