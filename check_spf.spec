@@ -1,4 +1,4 @@
-%define version          0.9.0
+%define version          1.0.0
 %define release          0
 %define sourcename       check_spf
 %define packagename      nagios-plugins-check-spf
@@ -65,5 +65,8 @@ rm -rf %{buildroot}
 %{_mandir}/man1/%{sourcename}.1*
 
 %changelog
+* Mon Apr 11 2022  <matteo@corti.li> - 1.0.0-0
+- Updates to 1.0.0
+
 * Thu Mar 12 2020  <matteo@corti.li> - 0.9.0-0
 - Updates to 0.9.0

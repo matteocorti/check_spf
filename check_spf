@@ -18,7 +18,7 @@ package main;
 use strict;
 use warnings;
 
-our $VERSION = '0.9.0';
+our $VERSION = '1.0.0';
 
 use Carp;
 use English qw(-no_match_vars);
@@ -213,10 +213,10 @@ sub run {
     );
 
     $options->arg(
-        spec     => 'nameserver=s',
-        help     => 'DNS server',
+        spec => 'nameserver=s',
+        help => 'DNS server',
     );
-    
+
     $options->arg(
         spec => 'myhostname|m',
         help => 'my hostname',
@@ -244,8 +244,8 @@ sub run {
         $options->get('ehlo'),
         $options->get('myhostname'),
         {
-            pass_all    => SPF_SoftFail,    # treat records like '+all' as error
-                 # rfc4408 => 1,              # for compatibility only
+            pass_all => SPF_SoftFail,    # treat records like '+all' as error
+                # rfc4408 => 1,              # for compatibility only
         }
     );
 
@@ -257,8 +257,8 @@ sub run {
     if ( $options->get('nameserver') ) {
         $dns_options{'nameserver'} = $options->get('nameserver');
     }
-    my $resolver = Net::DNS::Resolver->new( %dns_options ) ;
-    
+    my $resolver = Net::DNS::Resolver->new(%dns_options);
+
     my ( $result, @ans ) = $spf->lookup_blocking( undef, $resolver );
 
     # Default

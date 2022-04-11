@@ -1,6 +1,7 @@
 2022-04-11  Matteo Corti  <matteo@corti.li>
 
         * check_spf (run): The EHLO parameter was ignored
+        * check_spf (run): Added an option to specify the DNS server
 
 2020-07-14  Matteo Corti  <matteo@corti.li>
 
