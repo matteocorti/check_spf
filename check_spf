@@ -209,7 +209,7 @@ sub run {
     );
 
     $options->arg(
-        spec     => 'ehlo|helo|e',
+        spec     => 'ehlo|helo|e=s',
         help     => 'EHLO|HELO',
         required => 1,
     );
@@ -236,10 +236,10 @@ sub run {
     alarm $options->timeout;
 
     my $spf = Mail::SPF::Iterator->new(
-        $options->ip,
-        $options->from,
-        $options->ehlo,
-        $options->myhostname,
+        $options->get('ip'),
+        $options->get('from'),
+        $options->get('ehlo'),
+        $options->get('myhostname'),
         {
             default_spf => 'mx/24 ?all',    # in case no record was found in DNS
             pass_all    => SPF_SoftFail,    # treat records like '+all' as error
