@@ -8,14 +8,12 @@ package main;
 #
 # See  the INSTALL file for installation instructions
 #
-# Copyright (c) 2020 Matteo Corti <matteo@corti.li>
+# Copyright (c) 2020-2022 Matteo Corti <matteo@corti.li>
 #
 # This module is free software; you can redistribute it and/or modify it
 # under the terms of GNU general public license (gpl) version 3,
 # or (at your option) any later version.
 # See the COPYING file for details.
-
-use 5.00800;
 
 use strict;
 use warnings;
@@ -215,6 +213,11 @@ sub run {
     );
 
     $options->arg(
+        spec     => 'nameserver=s',
+        help     => 'DNS server',
+    );
+    
+    $options->arg(
         spec => 'myhostname|m',
         help => 'my hostname',
     );
@@ -241,16 +244,21 @@ sub run {
         $options->get('ehlo'),
         $options->get('myhostname'),
         {
-            default_spf => 'mx/24 ?all',    # in case no record was found in DNS
             pass_all    => SPF_SoftFail,    # treat records like '+all' as error
                  # rfc4408 => 1,              # for compatibility only
         }
     );
 
     # could be other resolvers too
-    my $resolver = Net::DNS::Resolver->new;
-
-    ### OR with
+    my %dns_options;
+    if ( $options->get('debug') ) {
+        $dns_options{'debug'} = 1;
+    }
+    if ( $options->get('nameserver') ) {
+        $dns_options{'nameserver'} = $options->get('nameserver');
+    }
+    my $resolver = Net::DNS::Resolver->new( %dns_options ) ;
+    
     my ( $result, @ans ) = $spf->lookup_blocking( undef, $resolver );
 
     # Default
