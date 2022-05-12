@@ -18,7 +18,7 @@ package main;
 use strict;
 use warnings;
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.1.0';
 
 use Carp;
 use English qw(-no_match_vars);
@@ -264,20 +264,25 @@ sub run {
     # Default
     if ( $result eq 'Pass' || $result eq 'Neutral' ) {
         $plugin->nagios_exit( Monitoring::Plugin->OK,
-            $result . ': ' . $ans[0] );
+            $result . ': ' . $options->get('ip') . q{ } . $ans[0] );
     }
-    elsif ( $result eq 'SoftFail' || $result eq 'Fail' ) {
+    elsif ($result eq 'SoftFail'
+        || $result eq 'Fail'
+        || $result eq 'PermError'
+        || $result eq 'TempError' )
+    {
         $plugin->nagios_exit( Monitoring::Plugin->CRITICAL,
             $result . ': ' . $ans[0] );
     }
-    elsif ( $result eq 'PermError' || $result eq 'TempError' ) {
-        $plugin->nagios_exit( Monitoring::Plugin->UNKNOWN,
-            $result . ': ' . $ans[0] );
+    elsif ( $result eq 'None' ) {
+        $plugin->nagios_exit( Monitoring::Plugin->CRITICAL,
+            'Error: ' . $ans[1]{'problem'} );
     }
 
     ### print mailheader
 
     #    print Dumper $spf;
+    #    print Dumper $result;
 
     # $result = Fail|Pass|...
     # $ans[0] = comment for Received-SPF

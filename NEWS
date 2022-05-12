@@ -1,3 +1,5 @@
+* 2022-05-12, Version 1.1.0
+ * Better output and error messages (e.g., if an SPF record is missing)
 * 2022-04-11, Version 1.0.0
  * The EHLO parameter was ignored
  * Added an option to specify the DNS server
