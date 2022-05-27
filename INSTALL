@@ -1,7 +1,7 @@
 Build and install check_spf
 
-Dependecies
-===========
+Dependencies
+============
 
 check_spf depends on several Perl modules:
 
