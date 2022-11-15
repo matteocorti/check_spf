@@ -10,7 +10,7 @@
 Summary:       A Nagios plugin to check if RedHat or Fedora system is up-to-date
 Name:          %{packagename}
 Version:       %{version}
-Obsoletes:     check_spf
+Obsoletes:     check_spf <= 100
 Release:       %{release}%{?dist}
 License:       GPLv3+
 Packager:      Matteo Corti <matteo@corti.li>
