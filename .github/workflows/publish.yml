@@ -28,7 +28,7 @@ jobs:
               dnf install -y sudo perl-Module-Install perl-Monitoring-Plugin perl-Perl-Critic rpm-build openssh-clients perl-Mail-SPF-Iterator perl-Net-DNS
     steps:
       - name: Git clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
       - name: Build the RPM on ${{ matrix.distro }}
