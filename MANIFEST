@@ -1,4 +1,5 @@
 AUTHORS
+build_rpm.sh
 Changes
 check_distribution.sh
 check_spf
@@ -24,6 +25,8 @@ MANIFEST.SKIP
 MYMETA.json
 MYMETA.yml
 NEWS
+publish_release.sh
 README.md
+RELEASE_NOTES.md
 t/00_modules.t
 TODO
